@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // If you are testing on your local machine, 'http://127.0.0.1:8000' is correct.
     // If you deployed to your server, it will be 'http://35.185.249.253' (or whatever your IP is)
     // If your Uvicorn is on a different port, change :8000
-    const API_URL = 'https://rae.abrdns.com';
+    const API_URL = 'https://raeai.xyz';    
+
     // --- Get DOM Elements ---
     const menuToggle = document.getElementById('menuToggle');
     const sideNav = document.getElementById('sideNav');
