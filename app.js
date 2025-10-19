@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 0. API Configuration ---
-    // !!! IMPORTANT: Change this to your server's IP address and port !!!
-    // If you are testing on your local machine, 'http://127.0.0.1:8000' is correct.
-    // If you deployed to your server, it will be 'http://35.185.249.253' (or whatever your IP is)
-    // If your Uvicorn is on a different port, change :8000
-    const API_URL = 'https://raeai.xyz';    
+    const API_URL = 'https://raeai.xyz'; // Your production URL
+
+    // --- 1. Chat History Storage ---
+    // This array will hold the conversation, formatted for the Gemini API
+    let chatHistory = [];
 
     // --- Get DOM Elements ---
     const menuToggle = document.getElementById('menuToggle');
@@ -16,87 +16,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatThread = document.getElementById('chatThread');
     const welcomeScreen = document.getElementById('welcomeScreen');
 
-    // --- 1. Mobile Side-Nav Toggle ---
+    // --- 2. Mobile Side-Nav Toggle ---
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {
             appContainer.classList.toggle('side-nav-open');
         });
     }
 
-    // --- 2. Chat Send Functionality (MODIFIED FOR API) ---
+    // --- 3. Chat Send Functionality (MODIFIED FOR MEMORY) ---
     if (inputBar) {
-        // Make the submit handler asynchronous
         inputBar.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Stop form from reloading page
-            
+            event.preventDefault();
             const promptText = promptInput.value.trim();
-            if (promptText === "") return; // Don't send empty messages
+            if (promptText === "") return;
 
-            // Hide welcome screen on first message
             if (welcomeScreen) {
                 welcomeScreen.style.display = 'none';
             }
 
-            // 2a. Add User's message to chat thread
+            // 3a. Add User's message to chat thread UI
             addMessageToChat(promptText, 'user');
+            
+            // 3b. Add User's message to history array
+            const userPrompt = {
+                role: 'user',
+                parts: [{ text: promptText }]
+            };
+            chatHistory.push(userPrompt);
 
-            // 2b. Clear input field and disable send button
+            // 3c. Clear input and disable button
             promptInput.value = '';
-            promptInput.style.height = 'auto'; // Reset height
+            promptInput.style.height = 'auto';
             sendButton.disabled = true;
 
-            // --- 2c. INTEGRATION: Call FastAPI Backend ---
-            
-            // Create an empty bot message element to stream into
-            const botMessageElement = document.createElement('div');
-            botMessageElement.classList.add('chat-message', 'bot-message');
+            // 3d. Create bot message element and variable to hold full response
+            const botMessageElement = createMessageElement('bot');
             chatThread.appendChild(botMessageElement);
             autoScroll();
+            let fullBotResponse = ""; // To store the complete response for history
 
             try {
-                // Make the POST request to your API
+                // 3e. Call API with the *entire* history
                 const response = await fetch(`${API_URL}/api/v1/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: promptText })
+                    body: JSON.stringify({ history: chatHistory }) // Send the whole history
                 });
 
                 if (!response.ok) {
                     throw new Error(`API error! Status: ${response.status}`);
                 }
 
-                // Get the readable stream from the response body
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 
-                // Read chunks from the stream
                 while (true) {
                     const { done, value } = await reader.read();
-                    if (done) break; // Stream finished
+                    if (done) break;
                     
-                    // Decode the chunk (which is a Uint8Array) into text
                     const chunkText = decoder.decode(value);
-                    
-                    // Append the new text to the bot message
-                    botMessageElement.textContent += chunkText;
-                    
-                    // Keep scrolling to the bottom
+                    fullBotResponse += chunkText; // Append chunk to full response
+                    botMessageElement.textContent = fullBotResponse; // Update UI
                     autoScroll();
                 }
 
             } catch (error) {
                 console.error("Error fetching stream:", error);
                 botMessageElement.textContent = `Error: Could not connect to Rae. ${error.message}`;
-                // You could add special error styling here
             } finally {
-                // Re-enable the send button once the stream is done or fails
+                // 3f. Add the *complete* bot response to history
+                if (fullBotResponse.trim() !== "") {
+                    chatHistory.push({
+                        role: 'model',
+                        parts: [{ text: fullBotResponse }]
+                    });
+                }
+                // 3g. Re-enable the send button
                 sendButton.disabled = false;
+                promptInput.focus(); // Focus back on the input
             }
-            // --- End of API Integration ---
         });
     }
     
-    // --- 3. Auto-expanding Textarea ---
+    // --- 4. Auto-expanding Textarea ---
     if (promptInput) {
         promptInput.addEventListener('input', () => {
             promptInput.style.height = 'auto';
@@ -105,16 +107,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Helper Function to Add Static Messages (like the user's) ---
-    function addMessageToChat(text, sender) {
+    // --- 5. Helper Functions ---
+    function createMessageElement(sender) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message', `${sender}-message`);
+        return messageElement;
+    }
+
+    function addMessageToChat(text, sender) {
+        const messageElement = createMessageElement(sender);
         messageElement.textContent = text;
         chatThread.appendChild(messageElement);
         autoScroll();
     }
 
-    // --- Helper Function to Auto-Scroll ---
     function autoScroll() {
         chatThread.scrollTop = chatThread.scrollHeight;
     }

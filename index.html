@@ -3,63 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ME - Your Personal AI</title>
+    <title>Rae - Personal AI</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <script
-      src="https://kit.fontawesome.com/a076d05399.js"
-      crossorigin="anonymous"
-    ></script>
   </head>
-  <body class="light-mode">
+  <body class="dark-mode">
     <div id="appContainer" class="app-container">
       <nav id="sideNav" class="side-nav">
         <div class="side-nav-content">
           <button class="new-chat-btn">New Chat</button>
-          <div class="search-bar">
-            <input type="text" placeholder="Search history..." />
-          </div>
-          <ul class="chat-history-list">
-            <li class="history-item active">Current Conversation</li>
-            <li class="history-item">Python Script Help</li>
-            <li class="history-item">My Trip to Japan</li>
-          </ul>
         </div>
 
         <footer class="side-nav-footer">
-          <a href="#">Terms & Privacy</a>
           <a href="#">Settings</a>
-          <a href="#">Help</a>
         </footer>
       </nav>
 
       <main id="mainContent" class="main-content">
         <header class="mobile-header">
           <button id="menuToggle" class="icon-button">☰</button>
-          <h3>ME</h3>
+          <h3>Rae</h3>
           <button id="settingsToggle" class="icon-button">⚙</button>
         </header>
 
         <div id="chatThread" class="chat-thread">
           <section id="welcomeScreen" class="welcome-screen">
-            <h1 class="greeting-message">Hello, how can I help you today?</h1>
+            <h1 class="greeting-message">Hello, Aditya.</h1>
             <div class="example-prompt-grid">
-              <div class="prompt-card accent-blue">Plan a trip to Japan</div>
-              <div class="prompt-card accent-red">Write a Python script</div>
-              <div class="prompt-card accent-yellow">
-                Summarize this article
+              <div class="prompt-card">"Who are you?"</div>
+              <div class="prompt-card">"Tell me about your creator."</div>
+              <div class="prompt-card">
+                "What do you remember about our chat?"
               </div>
-              <div class="prompt-card accent-green">Draft an email</div>
+              <div class="prompt-card">"Summarize our conversation."</div>
             </div>
           </section>
         </div>
 
         <form id="inputBar" class="input-bar">
-          <button type="button" class="icon-button">📎</button>
-          <button type="button" class="icon-button">🎙️</button>
           <textarea
             id="promptInput"
             placeholder="Enter your prompt here..."
@@ -72,26 +58,7 @@
       </main>
     </div>
 
-    <div id="paywallModal" class="modal-overlay" style="display: none">
-      <div class="modal-content">
-        <h2>Upgrade Your Plan</h2>
-        <div class="pricing-tier-card">
-          <h3>Gemini (Standard)</h3>
-          <p>Free</p>
-          <button disabled>Your current plan</button>
-        </div>
-        <div class="pricing-tier-card advanced">
-          <h3>Gemini Advanced</h3>
-          <ul>
-            <li>Access our most capable models</li>
-            <li>New exclusive features</li>
-          </ul>
-          <button class="cta-button">Upgrade to Gemini Advanced</button>
-        </div>
-        <p class="trust-element">Cancel anytime.</p>
-        <button class="close-modal-btn">X</button>
-      </div>
-    </div>
+    <div id="paywallModal" class="modal-overlay" style="display: none"></div>
 
     <script src="app.js"></script>
   </body>
